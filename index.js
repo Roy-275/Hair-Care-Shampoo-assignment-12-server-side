@@ -34,6 +34,15 @@ async function run() {
             res.json(products);
         })
 
+        // get api for specific user ordersCollection
+        app.get('/orders', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email }
+            const cursor = ordersCollection.find(query);
+            const orders = await cursor.toArray();
+            res.json(orders);
+        })
+
         // get api for single product details
         app.get('/products/:productId', async (req, res) => {
             const id = req.params.productId;
@@ -54,6 +63,16 @@ async function run() {
             const order = req.body;
             const result = await ordersCollection.insertOne(order);
             res.json(result)
+        })
+
+        // delete api for orders to cancel by user
+        app.delete('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            console.log(query);
+            const result = await ordersCollection.deleteOne(query);
+            console.log(result)
+            res.json(result);
         })
     }
     finally {
