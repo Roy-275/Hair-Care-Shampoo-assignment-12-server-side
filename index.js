@@ -19,6 +19,7 @@ async function run() {
         const database = client.db('hair_care_shampoo');
         const productsCollection = database.collection('products');
         const ordersCollection = database.collection('orders');
+        const reviewsCollection = database.collection('reviews');
 
         // get api for getting all productCollection
         app.get('/allproducts', async (req, res) => {
@@ -27,11 +28,25 @@ async function run() {
             res.json(products);
         })
 
+        // get api for getting all Reviews
+        app.get('/reviews', async (req, res) => {
+            const cursor = reviewsCollection.find({})
+            const reviews = await cursor.toArray();
+            res.json(reviews);
+        })
+
         // get api for productCollection
         app.get('/products', async (req, res) => {
             const cursor = productsCollection.find({}).limit(6);
             const products = await cursor.toArray();
             res.json(products);
+        })
+
+        // get api for all ordersCollection
+        app.get('/allorders', async (req, res) => {
+            const cursor = ordersCollection.find({});
+            const orders = await cursor.toArray();
+            res.json(orders);
         })
 
         // get api for specific user ordersCollection
@@ -65,13 +80,36 @@ async function run() {
             res.json(result)
         })
 
-        // delete api for orders to cancel by user
+        // post api for reviewsCollection
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewsCollection.insertOne(review);
+            res.json(result)
+        })
+
+        // delete api for orders by user only
         app.delete('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await ordersCollection.deleteOne(query);
+            res.json(result);
+        })
+
+        // delete api for orders by admin
+        app.delete('/allorders/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             console.log(query);
             const result = await ordersCollection.deleteOne(query);
             console.log(result)
+            res.json(result);
+        })
+
+        // delete api for products by admin
+        app.delete('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(query);
             res.json(result);
         })
     }
